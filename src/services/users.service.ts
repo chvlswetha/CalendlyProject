@@ -7,6 +7,8 @@ export async function findAllUsers(){ //called from Controller
 
 }
 export async function findById(id: number){ 
+    
+    console.log("Inside Service");
 
     const user = await getById(id); //calls the reposiotry layer for dbcall
 

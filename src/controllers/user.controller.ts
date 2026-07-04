@@ -8,6 +8,7 @@ export async function findAllUsers(_req : Request, res: Response) {  //Called fr
 
 export async function findById(_req: Request, res: Response) {  
     const {id} = _req.params; //API parameters comes as string
+    console.log("Inside Controller");
     const response = await findByIdService(Number(id));  // convert the string id to number to the service
 
     res.json(response); //gives the response back to router that is in app object
