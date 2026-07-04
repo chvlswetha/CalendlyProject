@@ -12,3 +12,10 @@ export async function findById(_req: Request, res: Response) {
 
     res.json(response); //gives the response back to router that is in app object
 }
+
+export async function createUser(_req: Request, res: Response) {
+
+    console.log(_req.body);
+
+    res.json();
+}
