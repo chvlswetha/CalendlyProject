@@ -4,6 +4,7 @@
 import express , {Express} from 'express';
 import { userRouter } from './routers/user.router.js';
 import { errorHandler } from './middleware/error-handler.js';   
+import { ApiError } from './utils/api-error.js';
 
 
 const app : Express = express();
@@ -34,6 +35,7 @@ const sequence = [logRequest, anotherLogger]; */
 app.get('/health', (_req, res) => {
 
     console.log("Executed health check route");
+    throw new ApiError(400, "Bad Request");
     res.json({ 
         status: 'ok!',
         timeStamp: new Date().toISOString()
