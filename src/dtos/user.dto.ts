@@ -7,5 +7,5 @@ export const createUserSchema = z.object({
   
 });
 
-export type CreateuserDto = z.infer<typeof createUserSchema>; //takes Zod schema object and infers the type from it.
+export type CreateUserDto = z.infer<typeof createUserSchema>; //takes Zod schema object and infers the type from it.
 
