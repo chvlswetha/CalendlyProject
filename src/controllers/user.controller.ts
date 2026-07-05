@@ -17,9 +17,9 @@ export async function findById(_req: Request, res: Response) {
     sendSuccess(res, response); //gives the response back to router that is in app object
 }
 
-export async function createUser(_req: Request, res: Response) {
+export async function createUser(req: Request, res: Response) {
 
-    console.log(_req.body);
+    console.log(req.body);
 
     res.json();
 }
