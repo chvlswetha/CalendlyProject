@@ -1,5 +1,6 @@
 import { prisma } from  "../config/database.js"
-import { CreateUserDto } from "../dtos/user.dto.js";
+import { CreateUserDto,UpdateUserDto } from "../dtos/user.dto.js";
+
 
 export async function getAll(){
     const users = await prisma.user.findMany(); // this repository function  makes the database call    
@@ -30,6 +31,25 @@ export async function findByEmail(email: string){
         where :{
             email : email
         }      
+    });
+    return user;
+}
+
+export async function update(id: number, data: UpdateUserDto){
+    const user = await prisma.user.update({
+        where :{
+            id : id
+        },
+        data : data
+    });
+    return user;
+}   
+
+export async function remove(id: number){
+    const user = await prisma.user.delete({
+        where :{
+            id : id
+        }
     });
     return user;
 }

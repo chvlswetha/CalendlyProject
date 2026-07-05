@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { createUser,  findAllUsers,findById } from "../controllers/user.controller.js";
+import { createUser, updateUser, deleteUser, findAllUsers,findById } from "../controllers/user.controller.js";
 import { validate } from "../middleware/validate.js";
-import { createUserSchema } from "../dtos/user.dto.js";
+import { createUserSchema , updateUserSchema} from "../dtos/user.dto.js";
 
 //So the /users will delegate to userRouter from App.ts and come here
 export const userRouter:Router = Router(); //we will see the router after /users in the url.
@@ -14,3 +14,7 @@ userRouter.get('/', findAllUsers);  //navigates to controller
 userRouter.get('/:id', findById);  //navigates to controller
 
 userRouter.post('/', validate(createUserSchema), createUser);  //navigates to controller
+
+userRouter.put('/:id', validate(updateUserSchema), updateUser);  //navigates to controller
+
+userRouter.delete('/:id', deleteUser);  //navigates to controller
