@@ -12,13 +12,35 @@ datasource db {
   provider = "postgresql"
 }
 
-model User{
-  id Int @id @default(autoincrement())
-  email String @unique
-  name String
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
   CreatedAt DateTime @default(now())
   UpdatedAt DateTime @updatedAt
 
-  @@map("users")   //maps the entire model as users table in database
+  //user has many event types. Represents as EvenTypes array
+  eventTypes EventType[] //One user can have many event types. and an event type belongs to a user(one to many)
 
+  @@map("users") //maps the entire model as users table in database
+}
+
+model EventType {
+  id                  Int      @id @default(autoincrement())
+  hostId              Int
+  title               String
+  description         String?
+  durationminutes     Int
+  isActive            Boolean  @default(true)
+  locationType        String?  @default("online")
+  locationValue       String?
+  bufferBeforeMinutes Int?     @default(0)
+  bufferAfterMinutes  Int?     @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  host User @relation(fields: [hostId], references: [id], onDelete: Cascade) //primary key - id from a user table is referenced as hostId in eventType table. This is a foreign key relationship. One user can have many event types.
+  //OnDelete Cascade is like - if a user is deleted corresponding user events also gets deleted here
+
+  @@map("event_types") //maps the entire model as event_types table in database
 }
