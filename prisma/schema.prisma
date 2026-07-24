@@ -30,7 +30,8 @@ model EventType {
   hostId              Int
   title               String
   description         String?
-  durationminutes     Int
+  slug                String
+  durationMinutes     Int
   isActive            Boolean  @default(true)
   locationType        String?  @default("online")
   locationValue       String?
@@ -42,5 +43,6 @@ model EventType {
   host User @relation(fields: [hostId], references: [id], onDelete: Cascade) //primary key - id from a user table is referenced as hostId in eventType table. This is a foreign key relationship. One user can have many event types.
   //OnDelete Cascade is like - if a user is deleted corresponding user events also gets deleted here
 
+  @@unique([hostId, slug])
   @@map("event_types") //maps the entire model as event_types table in database
 }
