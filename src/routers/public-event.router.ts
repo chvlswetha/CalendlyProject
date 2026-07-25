@@ -3,4 +3,4 @@ import { getPublicEventType } from "../controllers/event-type.controller.js";
 
 export const publicEventRouter: Router = Router();
 
-publicEventRouter.get("/:userId/:slug", getPublicEventType);
+publicEventRouter.get("/:userId/event-types/:slug", getPublicEventType);
