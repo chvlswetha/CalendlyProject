@@ -1,5 +1,7 @@
+import { notDeepEqual } from 'node:assert';
 import {prisma} from '../config/database.js';
 import { CreateEventTypeDto, updateEventTypeDto } from '../dtos/eventType.dto.js';
+import { notFound } from '../utils/api-error.js';
 
 export async function findbyHostId(hostId: number) {
 
@@ -27,12 +29,12 @@ export async function getById(id: number){
     return eventType;
 }
 
-export async function create(hostId: number, data : CreateEventTypeDto){
+export async function create(hostId: number, data : CreateEventTypeDto & {slug : String}){
     
     const eventType = await prisma.eventType.create({
         data: {
           hostId,
-         ...data     
+         ...data   
        }
     });
     return eventType;
@@ -65,7 +67,22 @@ export async function findByHostAndSlug(hostId: number, slug: string){
     return eventType;
 }
 
+export async function findActiveByHostIdAndEventSlug(hostId: number, slug: string){
 
+    
+     const eventType = await prisma.eventType.findFirst({
+        where: {
+            isActive: true,
+            slug,
+            hostId : hostId
+
+        }
+     });
+     return eventType;
+}
+
+
+//checking if slug exists for a given host
 export async function SlugExistsForHost(hostId: number, slug: string){
 
     const existing = await prisma.eventType.findFirst({

@@ -3,6 +3,8 @@
 //import express , {Express,NextFunction} from 'express'; //cmmented the msample middleware code
 import express , {Express} from 'express';
 import { userRouter } from './routers/user.router.js';
+import { eventTypeRouter } from './routers/event-type.router.js';
+import { publicEventRouter } from './routers/public-event.router.js';
 import { errorHandler } from './middleware/error-handler.js';   
 import { ApiError } from './utils/api-error.js';
 import { routeNotFound } from './middleware/route-not-found.js';
@@ -53,6 +55,9 @@ app.get('/health', (_req, res) => {
     })
     }); */
     app.use('/api/users',userRouter); //if the route/request starts with /users, userRouter will  take that request. //UserRouter is delgate here
+
+    app.use('/api/event-types',eventTypeRouter); 
+    app.use('/api/public', publicEventRouter);
 
     
     //at the end we mention our error handler middleware.
