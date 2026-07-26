@@ -30,7 +30,7 @@ return active_rules;
 
 export async function findById(id : number) {
 
-    const rule = await prisma.availabilityRule.findMany({
+    const rule = await prisma.availabilityRule.findUnique({
         where : { id }
 });
 
@@ -80,7 +80,7 @@ return exceptions;
 
 export async function findExceptionsById(id : number) {
 
-    const exceptions = await prisma.availabiltyException.findMany({
+    const exceptions = await prisma.availabiltyException.findUnique({
         where : { id }
 });
 

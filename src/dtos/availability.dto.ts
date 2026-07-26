@@ -17,7 +17,7 @@ export const createAvailabilityRuleSchema  = createAvailabilityRuleBaseSchema.re
     {message: "Start time must be less than the End time"}
 );
 
-export const updateAvailabilityRuleSchema = createAvailabilityRuleSchema.partial();
+export const updateAvailabilityRuleSchema = createAvailabilityRuleBaseSchema.partial();
 
 export type createAvailabilityRuleDto = z.infer<typeof createAvailabilityRuleSchema>;
 export type updateAvailabilityRuleDto = z.infer<typeof updateAvailabilityRuleSchema>;
@@ -26,14 +26,16 @@ export type updateAvailabilityRuleDto = z.infer<typeof updateAvailabilityRuleSch
 // And  start time < end time. So extendinmg BaseSchema with superRefine method
 //SuperEfine Methos adds the error mesages to the path specified(startime,endTime etc..)
 
-export const createAvailabilityExceptionSchema = z.object({
+export const createAvailabilityExceptionBaseSchema = z.object({
     date: z.string().regex(dateRegex,"Date must be in MMMM-YY_DD format"),
     type: z.enum(["BLOCK_FULL_DAY", "BLOCK_PARTIAL","Add_AVAILABILITY WINDOW"]),
     startTime: z.string().regex(timeRegex, "Start time must be in HH:MM format"),
     endTime: z.string().regex(timeRegex, "End time must be in HH:MM format"),
     timezone: z.string().default("UTC"),
     reason: z.string().min(0).max(500).optional()
-}).superRefine((data,ctx) => {
+});
+
+export const createAvailabilityExceptionSchema = createAvailabilityExceptionBaseSchema.superRefine((data,ctx) => {
             if(data.type !== "BLOCK_FULL_DAY")
              {
                  if(!data.startTime)
@@ -46,7 +48,7 @@ export const createAvailabilityExceptionSchema = z.object({
 });
                  
 
-export const updateAvailabilityExceptionSchema = createAvailabilityExceptionSchema.partial();
+export const updateAvailabilityExceptionSchema = createAvailabilityExceptionBaseSchema.partial();
 
 export type CreateAvailabilityExceptionDto = z.infer<typeof createAvailabilityExceptionSchema>;
 export type updateAvailabilityExceptionDto = z.infer<typeof updateAvailabilityExceptionSchema>;
