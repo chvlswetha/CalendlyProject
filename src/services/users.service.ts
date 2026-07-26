@@ -2,6 +2,7 @@ import {getAll, getById, findByEmail, remove} from "../repositories/user.reposit
 import { notFound ,conflict   } from "../utils/api-error.js"; 
 import { CreateUserDto,UpdateUserDto } from "../dtos/user.dto.js";
 import { create,update } from "../repositories/user.repository.js";
+import slug from "slug";
 
 export async function findAllUsers(){ //called from Controller
 
@@ -29,7 +30,10 @@ export async function createUser(data: CreateUserDto){ //called from Controller
     if(existinguser){
         throw conflict('User already exists with this email');
     }
-    return create(data); //calls the reposiotry layer for dbcall and gives the response back to controller
+
+    const slugpassed = data.slug ? data.slug : slug(data.name, {lower : true });
+
+    return create({...data, slug: slugpassed}); //calls the reposiotry layer for dbcall and gives the response back to controller
 }
 
 export async function updateUser(id: number, data: UpdateUserDto){ 
