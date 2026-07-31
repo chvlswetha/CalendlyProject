@@ -37,9 +37,7 @@ function anotherLogger(req: Request, res: Response, next: NextFunction) {  //mid
 const sequence = [logRequest, anotherLogger]; */
 
 app.get('/health', (_req, res) => {
-
     console.log("Executed health check route");
-    throw new ApiError(400, "Bad Request");
     res.json({ 
         status: 'ok!',
         timeStamp: new Date().toISOString()

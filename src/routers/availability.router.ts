@@ -23,12 +23,12 @@ availabilityRouter.use(requireUserId);
 
 availabilityRouter.get('/rules', listRules);  //navigates to controller
 availabilityRouter.post('/rules', validate(createAvailabilityRuleSchema), createRule);  //navigates to controller
-availabilityRouter.patch('/rules', validate(updateAvailabilityRuleSchema), updateRule);  //navigates to controller
-availabilityRouter.delete('/rules', removeRule);
+availabilityRouter.patch('/rules/:id', validate(updateAvailabilityRuleSchema), updateRule);  //navigates to controller
+availabilityRouter.delete('/rules/:id', removeRule);
 
 
 availabilityRouter.get('/exceptions', listExceptions);  //navigates to controller
 availabilityRouter.post('/exceptions', validate(createAvailabilityExceptionSchema), createException);  //navigates to controller
-availabilityRouter.patch('/exceptions', validate(updateAvailabilityExceptionSchema), updateException);  //navigates to controller
-availabilityRouter.delete('/exceptions', removeException);
+availabilityRouter.patch('/exceptions/:id', validate(updateAvailabilityExceptionSchema), updateException);  //navigates to controller
+availabilityRouter.delete('/exceptions/:id', removeException);
 

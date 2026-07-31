@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
-const dateRegex = /^\d{4}-0[1-9]|1[0-2]-0[1-9]|[12]\d|3[01]$/
+const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
 export const createAvailabilityRuleBaseSchema = z.object({
     weekday: z.number().int().min(0).max(6),
@@ -27,10 +27,10 @@ export type updateAvailabilityRuleDto = z.infer<typeof updateAvailabilityRuleSch
 //SuperEfine Methos adds the error mesages to the path specified(startime,endTime etc..)
 
 export const createAvailabilityExceptionBaseSchema = z.object({
-    date: z.string().regex(dateRegex,"Date must be in MMMM-YY_DD format"),
+    date: z.string().regex(dateRegex,"Date must be in MMMM-YY-DD format"),
     type: z.enum(["BLOCK_FULL_DAY", "BLOCK_PARTIAL","Add_AVAILABILITY WINDOW"]),
-    startTime: z.string().regex(timeRegex, "Start time must be in HH:MM format"),
-    endTime: z.string().regex(timeRegex, "End time must be in HH:MM format"),
+    startTime: z.string().regex(timeRegex, "Start time must be in HH:MM format").optional(),
+    endTime: z.string().regex(timeRegex, "End time must be in HH:MM format").optional(),
     timezone: z.string().default("UTC"),
     reason: z.string().min(0).max(500).optional()
 });
