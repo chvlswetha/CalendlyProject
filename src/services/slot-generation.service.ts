@@ -1,0 +1,168 @@
+import {DateTime, Interval} from "luxon";
+
+export interface TimeWindow {
+    start: DateTime;
+    end: DateTime;
+}
+ 
+
+/*Given the time and date we will return absolute DateTime Object in Host's timezone
+
+//I/P = time  = 09:30
+* time = "09:30"
+* date  = "2026-01-01"
+* timezone = "UTC"
+
+* O/P 
+* DateTime = "2026-01-01T09:30:00.00Z"
+*/
+export function ParseTimeOnDate(date: DateTime, time: String, timezone: string)
+{
+    const [hour,minute] = time.split(":").map(Number);
+
+    return date.setZone(timezone).set({
+        hour,
+        minute,
+        second:0,
+        millisecond:0,
+    })
+}
+
+
+//Combine the overlapping Intervals
+export function mergeWindows(windows: TimeWindow[]) :TimeWindow[] {
+  
+     if(windows.length === 0) return [];
+
+     const sorted = [...windows].sort((a,b) => a.start.toMillis() - b.start.toMillis());  //sort by start time
+
+     const mergedResult: TimeWindow[]  = [sorted[0]];
+
+     for(let i=1; i<sorted.length; i++)
+     {
+        const current = sorted[i];
+        const last = mergedResult[mergedResult.length -1];
+
+        if(current.start <= last.end) {
+            last.end = current.end > last.end ? current.end : last.end;
+        } else {
+            mergedResult.push(current);
+        }
+
+     }
+     return mergedResult;
+}
+
+export function splitIntoSlots(
+    windows : TimeWindow[],
+    durationMinutes: number,
+    bufferBeforeMinutes: number,
+    bufferAfterMinutes: number
+
+) : TimeWindow[] {
+
+    const slots: TimeWindow[]  = [];
+
+    const totalMinutes = durationMinutes + bufferBeforeMinutes + bufferAfterMinutes;
+    for(const window of windows){
+
+        let cursor = window.start;
+
+        while(cursor.plus({minutes : totalMinutes}) <= window.end){
+
+            const slotStart = cursor.plus({minutes : bufferBeforeMinutes});
+            const slotEnd = slotStart.plus({minutes: durationMinutes});
+
+            slots.push({start: slotStart, end: slotEnd});
+
+            cursor = cursor.plus({minutes: durationMinutes});
+
+        }
+    }
+    return slots;
+}
+//removed the blocked slots
+export function subractWindow(windows : TimeWindow[], block: TimeWindow) : TimeWindow[] {
+
+    const result: TimeWindow[] = [];
+
+    for(const window of windows){
+        const interval = Interval.fromDateTimes(window.start, window.end);
+        const blocksInterval = Interval.fromDateTimes(block.start, block.end);
+
+        if(!interval.overlaps(blocksInterval)){
+            result.push(window);
+            return result;
+        }
+
+        if(block.start > window.start){
+            result.push({start: window.start, end: block.start});
+        }
+
+        if(block.end < window.end){
+            result.push({start: block.end, end: window.end});
+        }
+
+    }
+
+    return result.filter( w => w.end >= w.start); //drop zero length intervals
+}
+
+//filter out booked slots
+
+export function overlapsBooked(
+    slot: TimeWindow, 
+    booked : TimeWindow[], 
+    bufferBeforeMinutes: number, 
+    bufferAfterMinutes: number) : boolean {
+
+        const paddedStart = slot.start.minus({minutes : bufferBeforeMinutes});
+        const paddedEnd = slot.end.plus({minutes : bufferAfterMinutes});
+
+        return booked.some((b) => {
+            const interval = Interval.fromDateTimes(paddedStart, paddedEnd);
+            const bookedInterval = Interval.fromDateTimes(b.start, b.end);
+
+            return interval.overlaps(bookedInterval);
+        })
+
+    }
+//apply excetions on a particular day
+
+export function applyExceptionsForDate(
+    date: DateTime,
+    baseWindows: TimeWindow[],
+    exceptions: Array<{
+        type: "BLOCK_FULL_DAY" | "BLOCK_PARTIAL" |"Add_AVAILABILITY WINDOW",
+        startTime: string | null,
+        endTime: string | null,
+        timeZone: string,
+}>): TimeWindow[] {
+
+    let windows = [...baseWindows];
+
+    for(const ex of exceptions){
+        if(ex.type === "BLOCK_FULL_DAY")
+             return [];   //no slots for this date for full day block
+
+        if(ex.type === "BLOCK_PARTIAL" && ex.startTime && ex.endTime){
+            
+            const block = {
+                start : ParseTimeOnDate(date,ex.startTime,ex.timeZone),
+                end : ParseTimeOnDate(date,ex.endTime,ex.timeZone),
+
+            };
+            windows = subractWindow(windows,block);
+        }
+
+        if(ex.type === "Add_AVAILABILITY WINDOW"  && ex.startTime && ex.endTime){
+
+            windows.push({
+                start: ParseTimeOnDate(date,ex.startTime,ex.timeZone),
+                end: ParseTimeOnDate(date,ex.endTime,ex.timeZone),
+            })
+        }
+
+    }
+    return (mergeWindows(windows));
+}
