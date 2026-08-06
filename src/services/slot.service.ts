@@ -3,7 +3,8 @@ import { prisma } from "../config/database.js";
 import {SLOT_GENERATION_DAYS} from "../config/env.js"
 import { findActiveRulesByUser, findExceptionsByUserInRange } from "../repositories/availability.repository.js";
 import { findActiveEventTypesByHost } from "../repositories/event-type.repository.js";
-import { findBookedByHostInRange } from "../repositories/slot.repository.js";
+import { findBookedByHostInRange,upsertAvailableSlot , findFutureSlotsByEvenetTypeInRange, blockSlot } from "../repositories/slot.repository.js";
+import { getById as getUserById } from "../repositories/user.repository.js";
 import { applyExceptionsForDate, TimeWindow, windowsForWeekdayRule, splitIntoSlots, overlapsBooked} from "./slot-generation.service.js";
 
 export interface RegenerateHostSlotsInput{
@@ -14,7 +15,7 @@ export interface RegenerateHostSlotsInput{
 
 export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
 
-    const host = await prisma.user.findUnique({ where: { id: input.hostId }});
+    const host = await getUserById(input.hostId);
 
     if(!host) return;
 
@@ -96,28 +97,24 @@ export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
                 const key = `${eventType.id}_${startAt.toISOString()}_${endAt.toISOString()}`;
                 generatedValidSlotKeys.add(key);
 
-                await prisma.slot.upsert({
-                    where:{
-                    eventTypeId_startAt_endAt: {
-                        eventTypeId: eventType.id,
-                        startAt,
-                        endAt,
-                    }
-                },
-                create: {
-                    hostId: input.hostId,
-                    eventTypeId: eventType.id,
-                    startAt,
-                    endAt,
-                    status: 'AVAILABLE',
-                },
-                update:{
-                    status: 'AVAILABLE',
-                }
-
-              })
+                await upsertAvailableSlot(input.hostId,eventType.id,startAt,endAt);
             }
 
+        }
+
+        const futureSlots = await findFutureSlotsByEvenetTypeInRange(
+         eventType.id,
+         from.toJSDate(), 
+         to.toJSDate());
+
+
+        for(const slot of futureSlots){
+            const key = `${eventType.id}|${slot.startAt.toISOString()}|${slot.endAt.toISOString()}`;
+            if(!generatedValidSlotKeys.has(key)){
+                //this slot id no longer valid
+
+                await blockSlot(slot.id);
+            }
         }
     }
     

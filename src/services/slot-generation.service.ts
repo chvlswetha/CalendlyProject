@@ -92,7 +92,7 @@ export function subractWindow(windows : TimeWindow[], block: TimeWindow) : TimeW
 
         if(!interval.overlaps(blocksInterval)){
             result.push(window);
-            return result;
+            continue;
         }
 
         if(block.start > window.start){
