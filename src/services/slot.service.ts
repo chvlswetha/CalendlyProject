@@ -47,6 +47,8 @@ export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
 
     for(const eventType of eventTypes){
 
+        const generatedValidSlotKeys = new Set<string>();
+
         for(let cursor = from; cursor <= to; cursor = cursor.plus({days: 1})){
 
             const dateKey = cursor.toISODate();
@@ -85,12 +87,14 @@ export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
                 (slot) => slot.start > DateTime.utc() &&  !overlapsBooked(slot, bookedWindows, bufferBeforeMinutes, bufferAfterMinutes)
             );  //slots filtered to excelude past slots and slots that overlap with booked slots
 
+              //This loop addtehse correct slots to DB.
             for(const slot of slots){
 
                 const startAt = slot.start.toUTC().toJSDate();
                 const endAt = slot.end.toUTC().toJSDate();
 
                 const key = `${eventType.id}_${startAt.toISOString()}_${endAt.toISOString()}`;
+                generatedValidSlotKeys.add(key);
 
                 await prisma.slot.upsert({
                     where:{
@@ -119,3 +123,6 @@ export async function regenerateHostSlots(input: RegenerateHostSlotsInput){
     
 
 }
+
+//Invalid Solts = All slots in DB - new slots.
+
