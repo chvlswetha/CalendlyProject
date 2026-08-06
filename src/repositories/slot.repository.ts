@@ -15,4 +15,5 @@ export async function findBookedByHostInRange(hostId: number, startDate : Date, 
             }
         }
     )
+    return bookedslots;
 }

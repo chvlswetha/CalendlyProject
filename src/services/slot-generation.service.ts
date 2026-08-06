@@ -16,7 +16,7 @@ export interface TimeWindow {
 * O/P 
 * DateTime = "2026-01-01T09:30:00.00Z"
 */
-export function ParseTimeOnDate(date: DateTime, time: String, timezone: string)
+export function parseTimeOnDate(date: DateTime, time: String, timezone: string)
 {
     const [hour,minute] = time.split(":").map(Number);
 
@@ -133,7 +133,7 @@ export function applyExceptionsForDate(
     date: DateTime,
     baseWindows: TimeWindow[],
     exceptions: Array<{
-        type: "BLOCK_FULL_DAY" | "BLOCK_PARTIAL" |"Add_AVAILABILITY WINDOW",
+        type: string, //"BLOCK_FULL_DAY" | "BLOCK_PARTIAL" |"Add_AVAILABILITY WINDOW",
         startTime: string | null,
         endTime: string | null,
         timeZone: string,
@@ -148,8 +148,8 @@ export function applyExceptionsForDate(
         if(ex.type === "BLOCK_PARTIAL" && ex.startTime && ex.endTime){
             
             const block = {
-                start : ParseTimeOnDate(date,ex.startTime,ex.timeZone),
-                end : ParseTimeOnDate(date,ex.endTime,ex.timeZone),
+                start : parseTimeOnDate(date,ex.startTime,ex.timeZone),
+                end : parseTimeOnDate(date,ex.endTime,ex.timeZone),
 
             };
             windows = subractWindow(windows,block);
@@ -158,11 +158,37 @@ export function applyExceptionsForDate(
         if(ex.type === "Add_AVAILABILITY WINDOW"  && ex.startTime && ex.endTime){
 
             windows.push({
-                start: ParseTimeOnDate(date,ex.startTime,ex.timeZone),
-                end: ParseTimeOnDate(date,ex.endTime,ex.timeZone),
+                start: parseTimeOnDate(date,ex.startTime,ex.timeZone),
+                end: parseTimeOnDate(date,ex.endTime,ex.timeZone),
             })
         }
 
     }
     return (mergeWindows(windows));
+}
+
+export function windowsForWeekdayRule(
+    
+        date: DateTime,
+        weekday : number,
+        startTime : string,
+        endTime : string,
+        timeZone :string
+): TimeWindow[] {
+
+const localDate = date.setZone(timeZone).startOf('day');
+const luxonWeekday = weekday === 0 ? 7 : weekday;  //luxon weekday are 1-7 not 0-6 //so chamnging to luxon compatible
+
+if(localDate.weekday !== luxonWeekday)
+     return [];
+
+const start = parseTimeOnDate(localDate,startTime,timeZone);
+const end = parseTimeOnDate(localDate,endTime,timeZone);
+
+if(!start.isValid || !end.isValid || start >= end)
+      return [];
+
+return [{start, end}];
+
+
 }

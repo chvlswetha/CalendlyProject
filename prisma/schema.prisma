@@ -41,8 +41,8 @@ model EventType {
   isActive            Boolean  @default(true)
   locationType        String?  @default("online")
   locationValue       String?
-  bufferBeforeMinutes Int?     @default(0)
-  bufferAfterMinutes  Int?     @default(0)
+  bufferBeforeMinutes Int      @default(0)
+  bufferAfterMinutes  Int      @default(0)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
@@ -92,7 +92,7 @@ model AvailabiltyException {
 }
 
 model Slot {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   hostId      Int
   eventTypeId Int
   startAt     DateTime
@@ -116,7 +116,7 @@ model Booking {
   id              Int       @id @default(autoincrement())
   hostId          Int
   eventTypeId     Int
-  slotId          Int
+  slotId          String
   inviteeEmail    String
   inviteeNotes    String?
   status          String    @default("PENDING")
