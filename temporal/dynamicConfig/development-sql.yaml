@@ -1,0 +1,6 @@
+frontend.persistenceMaxQPS:
+  - value: 2000
+
+limit.maxIDLength:
+  - value: 255
+    constraints: {}

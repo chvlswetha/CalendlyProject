@@ -13,7 +13,7 @@
 		"resolveJsonModule": true,
 		"noImplicitReturns": true,  
 		"noFallthroughCasesInSwitch": true,
-		"types": ["node", "zod"],
+		"types": ["node"],
 		"incremental": true,
 		"tsBuildInfoFile": ".tsbuildinfo"
 	},
